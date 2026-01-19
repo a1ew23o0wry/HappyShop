@@ -1,0 +1,10 @@
+Order ID: 20 
+State: Ordered 
+OrderedDateTime: 2025-12-15 20:47:31 
+ProgressingDateTime:  
+CollectedDateTime: 
+Items:
+ 0009    USB3 drive         ( 2) £   9.98
+--------------------------------------------
+ Total                               £   9.98
+
