@@ -40,7 +40,9 @@ public class CustomerModel {
     private String imageName = "imageHolder.jpg";                // Image to show in product preview (Search Page)
     private String displayLaSearchResult = "No Product was searched yet"; // Label showing search result message (Search Page)
     private String displayTaTrolley = "";                                // Text area content showing current trolley items (Trolley Page)
-    private String displayTaReceipt = "";                                // Text area content showing receipt after checkout (Receipt Page)
+    private String displayTaReceipt = "";// Text area content showing receipt after checkout (Receipt Page)
+    private static final double MIN_ORDER_VALUE = 5.00;
+
 
     //SELECT productID, description, image, unitPrice,inStock quantity
     void search() throws SQLException {
@@ -104,7 +106,7 @@ public class CustomerModel {
             //added
             remover.cusView = cusView;
 
-            remover.showRemovalMsg("a");
+
 
         }
         displayTaReceipt=""; // Clear receipt to switch back to trolleyPage (receipt shows only when not empty)
@@ -145,9 +147,9 @@ public class CustomerModel {
             // Note: If the trolley is already organized (merged and sorted), grouping is unnecessary.
             ArrayList<Product> groupedTrolley= groupProductsById(trolley);
             double total = calculateTotal(groupedTrolley);
-            if (total < 5.00) {
+            if (total < MIN_ORDER_VALUE) {
                 throw new underMinPaymentException(
-                        String.format("Minimum payment is £5.00 - Your total £%.2f.", total)
+                        String.format("Minimum order value is £%.2f - Your total is £%.2f.", MIN_ORDER_VALUE, total)
                 );
             }
 

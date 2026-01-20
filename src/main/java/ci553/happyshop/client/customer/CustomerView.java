@@ -227,6 +227,6 @@ public class CustomerView  {
     }
 
     public void showCheckoutError(String message) {
-        notifier.showRemovalMsg(message);
+        showWarning("Checkout blocked", message);
     }
 }
