@@ -96,7 +96,7 @@ public class RemoveProductNotifier {
         }
 
         window = new Stage();
-        window.initModality(Modality.NONE); //Optional: explicitly set as non-blocking, though this is the default
+        window.initModality(Modality.NONE);
         window.setTitle("🛒Products removal notifier");
         window.setScene(scene);
 

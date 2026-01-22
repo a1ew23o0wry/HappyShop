@@ -26,7 +26,7 @@ import java.sql.SQLException;
  *    depending on the current context. Only one of these is shown at a time.
  */
 
-public class CustomerView  {
+public class CustomerView implements CustomerViewPort {
     private RemoveProductNotifier notifier = new RemoveProductNotifier();
     public CustomerController cusController;
 

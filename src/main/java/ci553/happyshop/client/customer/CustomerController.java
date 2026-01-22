@@ -3,20 +3,31 @@ package ci553.happyshop.client.customer;
 import java.io.IOException;
 import java.sql.SQLException;
 import ci553.happyshop.catalogue.exception.underMinPaymentException;
+import ci553.happyshop.utility.sound.SoundEffect;
+import ci553.happyshop.utility.sound.SoundPlayer;
+
 
 
 
 public class CustomerController {
 
     public CustomerModel cusModel;
-    public CustomerView cusView;
+    public CustomerViewPort cusView;
+
+    private SoundPlayer sound = effect -> {};  // default: do nothing
+
+    public void setSoundPlayer(SoundPlayer sound) {
+        this.sound = (sound == null) ? (effect -> {}) : sound;
+    }
 
 
 
     public void doAction(String action) throws SQLException, IOException {
+        sound.play(SoundEffect.CLICK);
+
         switch (action) {
             case "Search":
-                cusModel.search();
+                cusModel.searchByIdOrName();
                 break;
             case "Add to Trolley":
                 cusModel.addToTrolley();
@@ -27,7 +38,11 @@ public class CustomerController {
             case "Check Out":
                 try {
                     cusModel.checkOut();
+                    //plays the sound
+                    sound.play(SoundEffect.SUCCESS);
                 } catch (underMinPaymentException e) {
+                    sound.play(SoundEffect.ERROR);
+
                     cusView.showCheckoutError(
                             e.getMessage()
                     );

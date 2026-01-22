@@ -26,7 +26,7 @@ import java.util.Map;
 
 //added
 
-public class CustomerModel {
+public class CustomerModel{
     //added
     private RemoveProductNotifier remover = new RemoveProductNotifier();
     public CustomerView cusView;
@@ -35,6 +35,11 @@ public class CustomerModel {
 
     private Product theProduct =null; // product found from search
     private ArrayList<Product> trolley =  new ArrayList<>(); // a list of products in trolley
+
+    private ArrayList<Product> nameSearchResults = new ArrayList<>(); //search by name
+    void setDatabaseRW(DatabaseRW db) {
+        this.databaseRW = db;
+    }
 
     // Four UI elements to be passed to CustomerView for display updates.
     private String imageName = "imageHolder.jpg";                // Image to show in product preview (Search Page)
@@ -71,6 +76,90 @@ public class CustomerModel {
         }
         updateView();
     }
+
+    //name search
+    public void searchByIdOrName() throws SQLException {
+
+        String id = cusView.tfId.getText().trim();
+        String name = cusView.tfName.getText().trim();
+
+        if (!id.isEmpty()) {
+            search();
+        } else {
+            searchByName();
+        }
+    }
+
+    ArrayList<Product> searchByNameCore(String rawName) throws SQLException {
+
+        String name = (rawName == null) ? "" : rawName.trim();
+        nameSearchResults.clear();
+        theProduct = null;
+
+        if (name.isEmpty()) {
+            displayLaSearchResult = "Please type a product name";
+            return new ArrayList<>();
+        }
+
+        //
+        nameSearchResults = databaseRW.searchProduct(name);
+
+        // dont show in stock
+        nameSearchResults.removeIf(p -> p == null || p.getStockQuantity() <= 0);
+
+        // Make results stable/predictable
+        nameSearchResults.sort(java.util.Comparator
+                .comparing(Product::getProductDescription, String.CASE_INSENSITIVE_ORDER)
+                .thenComparing(Product::getProductId));
+
+        if (nameSearchResults.isEmpty()) {
+            displayLaSearchResult = "No products match \"" + name + "\"";
+            return new ArrayList<>();
+        }
+
+        // If exactly one match, behave like normal search (set theProduct + show details)
+        if (nameSearchResults.size() == 1) {
+            theProduct = nameSearchResults.get(0);
+            Product p = theProduct;
+
+            displayLaSearchResult = String.format(
+                    "Product_Id: %s\n%s,\nPrice: £%.2f%s",
+                    p.getProductId(),
+                    p.getProductDescription(),
+                    p.getUnitPrice(),
+                    (p.getStockQuantity() < 100 ? "\n" + p.getStockQuantity() + " units left." : "")
+            );
+            return new ArrayList<>(nameSearchResults);
+        }
+
+        // Multiple matches show a short list user pick an ID
+        StringBuilder sb = new StringBuilder();
+        sb.append("Found ").append(nameSearchResults.size())
+                .append(" matches for \"").append(name).append("\".\n")
+                .append("Type an ID (from below) into the ID box to select:\n\n");
+
+        int limit = Math.min(10, nameSearchResults.size());
+        for (int i = 0; i < limit; i++) {
+            Product p = nameSearchResults.get(i);
+            sb.append(p.getProductId())
+                    .append(" - ")
+                    .append(p.getProductDescription())
+                    .append(" (£")
+                    .append(String.format("%.2f", p.getUnitPrice()))
+                    .append(")\n");
+        }
+        if (nameSearchResults.size() > limit) {
+            sb.append("\n...and ").append(nameSearchResults.size() - limit).append(" more");
+        }
+
+        displayLaSearchResult = sb.toString();
+        return new ArrayList<>(nameSearchResults);
+    }
+    void searchByName() throws SQLException {
+        searchByNameCore(cusView.tfName.getText());
+        updateView();
+    }
+
 
     void addToTrolley(){
         if(theProduct!= null){
